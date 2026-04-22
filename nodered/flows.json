@@ -1847,7 +1847,7 @@
         "type": "function",
         "z": "d0f6a9202ee4b311",
         "name": "Format Data for Database",
-        "func": "// Node-RED function node to format data including correct timezone handling\nmsg.payload = msg.payload || {};\n\n// Initialize or retrieve last received time for Receiver 1\nmsg.site_name = msg.mqtt.payload.location;\nmsg.node_id = msg.mqtt.payload.id;\nlet receiverID = msg.mqtt.payload.receiverID;\nlet processMessage = false;\nvar sendTime = new Date(msg.mqtt.payload.sendTime).getTime();\nvar lastReceivedTime = new Date(msg.payload[0].last_update).getTime();\n//let currentTime = new Date().getTime();\n// Get the current time and adjust for the time zone (e.g., UTC+8 for Hong Kong)\nlet timeZoneOffset = 8; // Hong Kong Time (HKT) UTC+8\nlet localTime = new Date(sendTime + timeZoneOffset * 3600 * 1000);\n// Format the local time to MySQL compatible format (YYYY-MM-DD HH:MM:SS)\nlet formattedTime = localTime.toISOString().replace('T', ' ').slice(0, 19);\n\n// Check if the message is from Receiver 1\nif (msg.differentTime == undefined) {\n    msg.differentTime = Math.abs(sendTime - lastReceivedTime);\n}\n// Process Receiver 2's message only if it's been more than 15 seconds since Receiver 1's last message\nif ((msg.differentTime) > 15000) {\n    processMessage = true;\n}\n\ndelete msg.differentTime;\n\n// Only construct the SQL query if the message should be processed\nif (processMessage) {\n\n    let id = parseInt(msg.mqtt.payload.id, 10) || 1;\n    let waterlevel = parseFloat(msg.mqtt.payload.waterlevel) || 0.0;\n    let statusMap = { 'green': 'GREEN', 'yellow': 'YELLOW', 'red': 'RED' };\n    let waterlevel_status = statusMap[msg.mqtt.payload.waterlevel_status] || 'RED';\n\n\n    // Construct the SQL query with formatted datetime\n    let sql = `INSERT INTO WaterLevelLogs (node_id , recorded_at, water_level, water_level_status) VALUES (?, ?, ?, ?)`;\n    msg.topic = sql;\n    msg.payload = [id, formattedTime, waterlevel, waterlevel_status];\n} else {\n    return null;\n}\n\nreturn msg;",
+        "func": "msg.payload = msg.payload || {};\n\n// Basic fields\nmsg.site_name = msg.mqtt.payload.location;\nmsg.node_id = msg.mqtt.payload.id;\n\nconst receiverID = Number(msg.mqtt.payload.receiverID);\nconst sendTime = new Date(msg.mqtt.payload.sendTime).getTime();\n\n// ----- Receiver selection logic -----\nconst receiverTimeoutMs = 15 * 1000;\nlet processMessage = false;\n\n// last time we accepted Receiver 1 (stored in Node-RED context)\nconst lastR1 = context.get(\"lastReceiver1Time\") || 0;\n\nif (receiverID === 1) {\n    // Always accept Receiver 1 and update last time\n    processMessage = true;\n    context.set(\"lastReceiver1Time\", sendTime);\n} else if (receiverID === 2) {\n    // Accept Receiver 2 only if Receiver 1 has been silent for >= 15s\n    if (!lastR1 || (sendTime - lastR1) >= receiverTimeoutMs) {\n        processMessage = true;\n    } else {\n        return null; // ignore Receiver 2 because Receiver 1 is still recent\n    }\n} else {\n    return null; // unknown receiver\n}\n\n// ----- Time formatting (HKT UTC+8) -----\nlet timeZoneOffset = 8; // Hong Kong Time (HKT)\nlet localTime = new Date(sendTime + timeZoneOffset * 3600 * 1000);\nlet formattedTime = localTime.toISOString().replace(\"T\", \" \").slice(0, 19);\n\n// Only construct the SQL query if the message should be processed\nif (processMessage) {\n    let id = parseInt(msg.mqtt.payload.id, 10) || 1;\n    let waterlevel = parseFloat(msg.mqtt.payload.waterlevel) || 0.0;\n    let statusMap = { green: \"GREEN\", yellow: \"YELLOW\", red: \"RED\" };\n    let waterlevel_status = statusMap[msg.mqtt.payload.waterlevel_status] || \"RED\";\n\n    // Construct the SQL query with formatted datetime\n    let sql =\n        \"INSERT INTO WaterLevelLogs (node_id, recorded_at, water_level, water_level_status) VALUES (?, ?, ?, ?)\";\n    msg.topic = sql;\n    msg.payload = [id, formattedTime, waterlevel, waterlevel_status];\n\n    return msg;\n}\n\nreturn null;",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -3607,24 +3607,6 @@
         ]
     },
     {
-        "id": "c7ff2aa181591055",
-        "type": "function",
-        "z": "077daf9d5d85158b",
-        "name": "WeatherStations",
-        "func": "// Node-RED function node to format data including correct timezone handling\nmsg.payload = msg.payload || {};\n\n// Initialize or retrieve current time for Receiver 1\nlet loopTime = 0;\nlet WeatherStations = [\"Cheung Ching\", \"Happy Valley\", \"Hong Kong International Airport\",\n \"Hong Kong Observatory\", \"Kai Tak\", \"Kwun Tong\", \"Magazine Gap\", \"San Po Kong\", \"Sha Tin\", \n \"Sham Shui Po\", \"Shau Kei Wan\", \"Sheung Shui\", \"Shui Pin Wai\", \"Stanley\", \"Tai Po Market\",\n  \"Tseung Kwan O\", \"Tsuen Wan Ho Koon\", \"Tuen Mun\"];\n\n\n\nfor(let i = 0; i <= 17; i++){\n    if (WeatherStations[i] == msg.payload.automaticWeatherStation){\n\n      let currentTime = new Date().getTime();\n      // Get the current time and adjust for the time zone (e.g., UTC+8 for Hong Kong)\n      let timeZoneOffset = 8; // Hong Kong Time (HKT) UTC+8\n      let localTime = new Date(currentTime + timeZoneOffset * 3600 * 1000);\n\n      // Format the local time to MySQL compatible format (YYYY-MM-DD HH:MM:SS)\n      let formattedTime = localTime.toISOString().replace('T', ' ').slice(0, 19);\n\n      let WeatherStation = msg.payload.automaticWeatherStation;\n      let rainfall = msg.payload.value;\n\n      if (msg.payload.value = \"M\") {\n           rainfall = 999.999;\n        } else {\n           rainfall = msg.payload.value;\n      }\n      \n\n\n      let sql = `INSERT INTO rainfalldata (time, WeatherStation, rainfall) VALUES (?, ?, ?)`;\n      msg.topic = sql;\n      msg.payload = [formattedTime, WeatherStation, rainfall];\n\n      return msg;\n    }else{\n      \n    }\n}\n\n\nreturn null;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 540,
-        "y": 380,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "0e244f8568ea6611",
         "type": "split",
         "z": "077daf9d5d85158b",
@@ -3723,8 +3705,8 @@
         "name": "",
         "scope": null,
         "uncaught": false,
-        "x": 480,
-        "y": 560,
+        "x": 520,
+        "y": 420,
         "wires": [
             [
                 "7ffa1ab943f9f1e8"
@@ -3740,8 +3722,8 @@
         "links": [
             "25c89047a92dd57a"
         ],
-        "x": 645,
-        "y": 560,
+        "x": 685,
+        "y": 420,
         "wires": []
     },
     {
