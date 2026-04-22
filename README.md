@@ -33,7 +33,6 @@ Caddy serves the web dashboard and manages traffic.
 📂 Water Level Project: Folder Structure
 This repository contains the full stack for an IoT-based water level monitoring system. It uses a Dockerized backend architecture for reliability and easy deployment.
 
-Plaintext
 WaterLevelProject-public/
 ├── 📂 Caddy/                  # Web Server & Reverse Proxy
 │   ├── 📂 Setup_wizard/       # Web-based configuration tools
