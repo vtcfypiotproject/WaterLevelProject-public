@@ -6,6 +6,7 @@
 .env.*
 !.env.example
 install_water_level.sh
+old.env
 
 # Docker volumes and bind mounts
 #/data/
