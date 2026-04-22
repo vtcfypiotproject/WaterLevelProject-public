@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>.env Setup Helper</title>
+        <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        h1 { color: var(--primary-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        h2 { font-size: 1.2rem; margin-top: 25px; color: #475569; border-left: 4px solid var(--primary-color); padding-left: 10px; }
+        
+        .setup-steps {
+            background-color: #eff6ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--primary-color);
+        }
+        .setup-steps ol { margin-bottom: 0; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: 2px solid var(--primary-color);
+            border-color: transparent;
+        }
+        .btn-container { margin-top: 30px; text-align: center; }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+        button:hover { background-color: #1d4ed8; }
+        
+        .links { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 0.9rem; }
+        .links a { color: var(--primary-color); text-decoration: none; margin-right: 15px; font-weight: 500; }
+        .links a:hover { text-decoration: underline; }
+        
+        .warning-text {
+            color: var(--danger-color);
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .terminal-list {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        font-family: 'Courier New', Courier, monospace;
+        padding: 20px;
+        border-radius: 5px;
+        list-style-type: none;
+        line-height: 1.6;
+        }
+
+        .terminal-list li::before {
+        content: "$ ";
+        color: #569cd6;
+        }
+    </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>.env Configuration Setup</h1>
+
+            <div class="setup-steps">
+                <strong>Installation Requirements:</strong>
+                <ol>
+                    <li>Download and install <b>Docker</b>:
+                        <a
+                            href="https://www.docker.com/products/docker-desktop/"
+                            target="_blank">Docker Desktop (Windows/Mac)</a> or
+                        <a href="https://docs.docker.com/engine/install/"
+                            target="_blank">Docker Engine (Linux)</a>.
+                    </li>
+                    <li><b>Crucial:</b> Please start the docker service.</li>
+                    <li>Use the following command in the powershell to get your
+                        Node-RED hashed password</li>
+
+                    <ul class="terminal-list">
+                        <li>docker run -d -p 1880:1880 --name mynodered
+                            nodered/node-red:4.1.1-22</li>
+                        <li>docker exec -it mynodered node-red admin
+                            hash-pw</li>
+                        <li>docker rm -f mynodered</li>
+                    </ul>
+                    <li>Fill in <b>all</b> the fields below.</li>
+                    <li><b>Crucial:</b> Move the downloaded file to the <b>root
+                            directory</b> of your
+                        <code>/WaterLevelProject-main</code> folder.</li>
+                    <li>Rename you file as ".env"</li>
+                </ol>
+            </div>
+
+            <div id="env-form">
+                <h2>Project</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Project Name (PROJECT_NAME)</label>
+                        <input type="text" id="PROJECT_NAME"
+                            value="WaterLevelProject">
+                    </div>
+                    <div class="form-group">
+                        <label>Timezone (TZ)</label>
+                        <input type="text" id="TZ" value="Asia/Hong_Kong">
+                    </div>
+                    <div class="form-group">
+                        <label>DOMAIN_NAME</label>
+                        <input type="text" id="DOMAIN_NAME"
+                            value="vtc-fyp-iot-project.uk">
+                    </div>
+                    <div class="form-group">
+                        <label>Docker host IP</label>
+                        <input type="text" id="MQTT_SERVER"
+                            value="192.168.1.101">
+                    </div>
+                </div>
+
+                <h2>Database Settings (MariaDB)</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Root Password</label>
+                        <input type="password" id="DB_ROOT_PASSWORD"
+                            placeholder="Required">
+                    </div>
+                    <div class="form-group">
+                        <label>User Name</label>
+                        <input type="text" id="DB_USER" value="USER">
+                    </div>
+                    <div class="form-group">
+                        <label>User Password</label>
+                        <input type="password" id="DB_PASSWORD"
+                            placeholder="Required">
+                    </div>
+                </div>
+
+                <h2>System Management (PhpMyAdmin & Node-RED)</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>PhpMyAdmin Port</label>
+                        <input type="text" id="PHPMYADMIN_EXTERNAL_PORT"
+                            value="14105">
+                    </div>
+                    <div class="form-group">
+                        <label>Node-RED Port</label>
+                        <input type="text" id="NODERED_EXTERNAL_PORT"
+                            value="14106">
+                    </div>
+                    <div class="form-group">
+                        <label>Node-RED User</label>
+                        <input type="text" id="NODERED_USER" value="USER">
+                    </div>
+                    <div class="form-group">
+                        <label>Node-RED Password (Hashed)</label>
+                        <input type="text" id="NODERED_PASSWORD"
+                            placeholder="Enter hashed password">
+                    </div>
+                    <div class="form-group">
+                        <label>DeepSeek API Key (sk-XXXXXX)</label>
+                        <input type="text" id="DEEPSEEK_API"
+                            placeholder="DeepSeek API Key" value="None">
+                    </div>
+                </div>
+
+                <h2>MQTT & Email Settings</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>MQTT User</label>
+                        <input type="text" id="MQTT_USER" value="USER">
+                    </div>
+                    <div class="form-group">
+                        <label>MQTT Password</label>
+                        <input type="password" id="MQTT_PASSWORD"
+                            placeholder="Required">
+                    </div>
+                    <div class="form-group">
+                        <label>Email User </label>
+                        <input type="email" id="EMAIL_USER"
+                            placeholder="example@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Gmail App Password</label>
+                        <input type="password" id="EMAIL_APP_PASSWORD"
+                            placeholder="Required">
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button onclick="downloadEnv()">Generate and Download
+                    .env</button>
+                <p class="warning-text">※ Please ensure all fields are filled
+                    before downloading.</p>
+            </div>
+
+            <div class="links">
+                <h3>Important Reference Links:</h3>
+                <a
+                    href="https://nodered.org/docs/user-guide/runtime/securing-node-red#:~:text=not%20be%20used.-,Generating%20the%20password%20hash,-If%20you%20are"
+                    target="_blank">Node-RED: Password Hash Guide<br></a>
+                <a href="https://api-docs.deepseek.com/"
+                    target="_blank">DeepSeek API Portal<br></a>
+                <a href="https://support.google.com/mail/answer/185833"
+                    target="_blank">Gmail: App Password Guide<br></a>
+                <a
+                    href="https://hub.docker.com/_/mariadb#:~:text=The-,environment%20variables,-required%20to%20use"
+                    target="_blank">MariaDB environment variables<br></a>
+            </div>
+        </div>
+
+        <script>
+    function downloadEnv() {
+        // 1. Check if all textboxes are filled
+        const inputs = document.querySelectorAll('#env-form input');
+        let allFilled = true;
+        
+        inputs.forEach(input => {
+            if (input.value.trim() === "") {
+                allFilled = false;
+                input.style.border = "2px solid #ef4444"; // Highlight empty fields
+            } else {
+                input.style.border = "1px solid #cbd5e1"; // Reset style
+            }
+        });
+
+        if (!allFilled) {
+            alert("Error: Please fill in all textboxes before generating the file.");
+            return; // Stop the execution
+        }
+
+        const getVal = (id) => document.getElementById(id).value;
+        
+        const content = `# Project related
+PROJECT_NAME=${getVal('PROJECT_NAME')}
+
+# Global Setting
+TZ=${getVal('TZ')}
+DOMAIN_NAME='${getVal('DOMAIN_NAME')}'
+
+# MariaDB Credentials
+DB_ROOT_PASSWORD=${getVal('DB_ROOT_PASSWORD')}
+DB_USER=${getVal('DB_USER')}
+DB_PASSWORD=${getVal('DB_PASSWORD')}
+
+# Phpmyadmin
+PHPMYADMIN_EXTERNAL_PORT=${getVal('PHPMYADMIN_EXTERNAL_PORT')}
+
+# Nodered
+NODERED_EXTERNAL_PORT='${getVal('NODERED_EXTERNAL_PORT')}'
+NODE_RED_CREDENTIAL_SECRET=NODE@RED@SECRET
+NODERED_USER=${getVal('NODERED_USER')}
+NODERED_PASSWORD='${getVal('NODERED_PASSWORD')}'
+DEEPSEEK_API='${getVal('DEEPSEEK_API')}'
+
+# MQTT
+MQTT_USER=${getVal('MQTT_USER')}
+MQTT_PASSWORD=${getVal('MQTT_PASSWORD')}
+MQTT_NO_SSL_PORT=14109
+MQTT_EXTERNAL_PORT=14107
+MQTT_WEBSOCKET_PORT=14108
+
+# Email
+EMAIL_USER='${getVal('EMAIL_USER')}'
+EMAIL_APP_PASSWORD='${getVal('EMAIL_APP_PASSWORD')}'
+`;
+
+        // Create and trigger download
+        const blob = new Blob([content], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '.env';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        // Success Alert with Reminders
+        alert("Success! Your file has been downloaded.\n\nFINAL STEPS:\n1. If the filename is '.env.txt', you MUST rename it to exactly '.env'\n2. Put the file at the root directory of the folder: /WaterLevelProject-main\nPlease keep your information consistent in this project!!!");
+    }
+    </script>
+
+    </body>
+</html>

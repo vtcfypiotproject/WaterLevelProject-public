@@ -1,0 +1,14 @@
+# This listens for HTTPS traffic on localhost
+# Port 14105 for phpMyAdmin
+:14105 {
+    reverse_proxy phpmyadmin_final:80
+    tls /etc/caddy/ssl/server-cert.pem /etc/caddy/ssl/server-key.pem
+}
+
+# Port 14106 for Node-RED
+:14106 {
+    reverse_proxy nodered_final:1880
+    tls /etc/caddy/ssl/server-cert.pem /etc/caddy/ssl/server-key.pem
+}
+
+

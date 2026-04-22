@@ -1,0 +1,31 @@
+# Docker
+.dockerignore
+
+# Local environment variables (Sensitive)
+.env
+.env.*
+!.env.example
+flows_cred.json
+settings.js
+install_water_level.sh
+
+# Docker volumes and bind mounts
+#/data/
+volumes/
+#/tmp/
+
+# IDE/Editor files (common in containerized projects)
+.vscode/
+.idea/
+*.swp
+
+# Docker Build artifacts
+bin
+build_src
+*.test
+
+# backup
+backup/
+
+# CA certificate
+CA_CERT/

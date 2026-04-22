@@ -1,0 +1,136 @@
+name: ${PROJECT_NAME}
+
+services:
+  mariadb:
+    build:
+      context: .
+      dockerfile: ./mariadb/Dockerfile  # Where the instructions are
+    container_name: mariadb_final
+    hostname: mariadb_final
+    restart: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: WaterLevelMonitoringSystem
+      TZ: ${TZ}
+    networks:
+      WaterSystemNetwork_final:
+        ipv4_address: 172.20.1.5
+    volumes:
+      - Mariadb_data:/var/lib/mysql
+      - ./mariadb/ssl.cnf:/etc/mysql/conf.d/ssl.cnf:ro
+
+  phpmyadmin:
+    build:
+      context: .
+      dockerfile: ./phpmyadmin/Dockerfile
+    container_name: phpmyadmin_final
+    restart: on-failure
+    hostname: phpmyadmin_final
+    environment:
+      PMA_HOST: mariadb_final
+      MYSQL_SSL: "true"
+      MYSQL_SSL_CA: /etc/phpmyadmin/ssl/ca-cert.pem
+      TZ: ${TZ}
+    networks:
+      WaterSystemNetwork_final:
+        ipv4_address: 172.20.1.2
+    depends_on:
+      - mariadb
+    volumes:
+      - ./CA_CERT/ca-cert.pem:/etc/phpmyadmin/ssl/ca-cert.pem:ro
+
+  node-red:
+    build:
+      context: .
+      dockerfile: ./nodered/Dockerfile
+    container_name: nodered_final
+    restart: on-failure
+    hostname: nodered_final
+    env_file:
+      - .env
+    environment:
+      TZ: ${TZ}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: WaterLevelMonitoringSystem
+      FLOWS: flows.json
+      NODE_RED_CREDENTIAL_SECRET: ${NODE_RED_CREDENTIAL_SECRET}
+      NODERED_USER: ${NODERED_USER}
+      NODERED_PASSWORD: ${NODERED_PASSWORD}
+      MQTT_USER: ${MQTT_USER}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_APP_PASSWORD: ${EMAIL_APP_PASSWORD}
+      DOMAIN_NAME: ${DOMAIN_NAME}
+    volumes:
+      - Nodered_data:/data
+    networks:
+      WaterSystemNetwork_final:
+        ipv4_address: 172.20.1.4
+
+  mqtt:
+    build:
+      context: .
+      dockerfile: ./mqtt/Dockerfile
+    container_name: mqtt_final
+    restart: on-failure
+    hostname: mqtt_final
+    environment:
+      TZ: ${TZ}
+    env_file:
+      - .env
+    ports:
+      - "${MQTT_EXTERNAL_PORT}:8883"
+      - "${MQTT_WEBSOCKET_PORT}:9001"
+    volumes:      
+      - MQTT_config:/mosquitto/config
+      - MQTT_data:/mosquitto/data
+      - MQTT_log:/mosquitto/log
+    networks:
+      WaterSystemNetwork_final:
+        ipv4_address: 172.20.1.6
+
+  caddy_proxy:
+    build:
+      context: .
+      dockerfile: ./Caddy/Dockerfile
+    container_name: caddy_final
+    restart: on-failure
+    hostname: caddy_final
+    ports:
+      - "${PHPMYADMIN_EXTERNAL_PORT}:14105"
+      - "${NODERED_EXTERNAL_PORT}:14106"
+      - "80:443"
+      - "443:443"
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ./CA_CERT:/etc/caddy/ssl:ro
+      - Caddy_data:/data
+      - Caddy_config:/config
+    networks:
+      WaterSystemNetwork_final:
+        ipv4_address: 172.20.1.10
+    depends_on:
+      - phpmyadmin
+      - node-red
+
+networks:
+  WaterSystemNetwork_final:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+          gateway: 172.20.1.1
+
+volumes:
+  Mariadb_data:
+  Nodered_data:
+  MQTT_config:
+  MQTT_data:
+  MQTT_log:
+  Caddy_data:
+  Caddy_config:
+
