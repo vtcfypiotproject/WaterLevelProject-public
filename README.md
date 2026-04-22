@@ -30,6 +30,42 @@ A Backend Script (Python/Node/PHP - add yours here) listens to MQTT and saves da
 
 Caddy serves the web dashboard and manages traffic.
 
+📂 Water Level Project: Folder Structure
+This repository contains the full stack for an IoT-based water level monitoring system. It uses a Dockerized backend architecture for reliability and easy deployment.
+
+Plaintext
+WaterLevelProject-public/
+├── 📂 Caddy/                  # Web Server & Reverse Proxy
+│   ├── 📂 Setup_wizard/       # Web-based configuration tools
+│   │   ├── env-generator.html      # Tool to generate .env files
+│   │   ├── index.html              # Wizard landing page
+│   │   ├── receiver-generator.html # Config generator for receiver units
+│   │   └── sender-generator.html   # Config generator for sender units
+│   ├── Caddyfile              # Web server configuration
+│   └── Dockerfile             # Caddy container definition
+├── 📂 ESP32/                  # Firmware for Microcontrollers
+│   ├── 📂 sample/             # Example code for hardware
+│   │   ├── receiver_final     # Code for the data receiving unit
+│   │   └── sender_final_id3   # Code for the sensor-equipped sender
+│   └── libraries.7z           # Compressed dependency libraries
+├── 📂 mariadb/                # Database Service
+│   ├── WaterLevelMonitoringSystem.sql # Initial database schema
+│   ├── ssl.cnf                # Secure connection configuration
+│   └── Dockerfile             # Database container definition
+├── 📂 mqtt/                   # Communication Broker (Mosquitto)
+│   ├── mosquitto.conf         # MQTT broker settings
+│   ├── docker-entrypoint.sh   # Initialization script
+│   └── Dockerfile             # MQTT container definition
+├── 📂 nodered/                # Logic & Dashboard Engine
+│   ├── flows.json             # Visual programming logic and UI
+│   ├── test.js                # Testing scripts
+│   └── Dockerfile             # Node-RED container definition
+├── 📂 phpmyadmin/             # Database Management GUI
+│   └── Dockerfile             # Web interface for MariaDB
+├── docker-compose.yaml        # Orchestration (Starts all services)
+├── sample_for_env             # Template for environment variables
+└── README.md                  # Main documentation
+
 # 🚀 Getting Started
 Prerequisites
 
