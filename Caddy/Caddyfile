@@ -1,4 +1,15 @@
-# This listens for HTTPS traffic on localhost
+# Main Web Service (Setup Wizard)
+:443 {
+    # Points to the directory where we copied the files in the Dockerfile
+    root * /usr/share/caddy
+    
+    # Enables serving the index.html and the Setup_wizard folder
+    file_server
+    
+    # Use your existing SSL certificates
+    tls /etc/caddy/ssl/server-cert.pem /etc/caddy/ssl/server-key.pem
+}
+
 # Port 14105 for phpMyAdmin
 :14105 {
     reverse_proxy phpmyadmin_final:80
@@ -10,5 +21,3 @@
     reverse_proxy nodered_final:1880
     tls /etc/caddy/ssl/server-cert.pem /etc/caddy/ssl/server-key.pem
 }
-
-
