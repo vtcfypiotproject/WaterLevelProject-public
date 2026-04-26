@@ -154,5 +154,3 @@ echo "Check logs with:   cd /opt/$PROJECT_DIR && docker compose logs -f"
 echo "=================================================="
 
 exit 0
-# Start the docker compose
-# You may need to use sudo before docker compose 
