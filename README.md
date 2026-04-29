@@ -30,7 +30,7 @@ ESP32 reads the water level and publishes data via MQTT.
 
 The MQTT Broker (inside Docker) receives the messages.
 
-A Backend Script (Python/Node/PHP - add yours here) listens to MQTT and saves data to MariaDB.
+Node-red backend listens to MQTT and saves data to MariaDB.
 
 Caddy serves the web dashboard and manages traffic.
 
