@@ -35,7 +35,7 @@ Node-red backend listens to MQTT and saves data to MariaDB.
 Caddy serves the web dashboard and manages traffic.
 
 
-=======
+
 --
 
 ### 📂 Water Level Project: Folder Structure
@@ -153,9 +153,9 @@ DNS.1 = vtc-fyp-iot-project.uk
 IP.1 = 192.168.1.101
 EOF
 ```
-```
-Window commands
 
+Window commands
+```
 # Window
 $conf = @'
 authorityKeyIdentifier=keyid,issuer
