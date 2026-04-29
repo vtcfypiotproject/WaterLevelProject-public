@@ -86,10 +86,10 @@ Docker and Docker Compose installed.
 
 Arduino IDE (or PlatformIO) for flashing the ESP32.
 
-1. Setup the Backend (Docker)
+## 1. Setup the Backend (Docker)
 Clone this repository and navigate to the root directory:
 
-2. Setup the .env file
+## 2. Setup the .env file
 Setup your .env file which include the user name and password for this project.
 Put it in the project root directory.
 Here is a sample
@@ -125,20 +125,108 @@ EMAIL_USER='EMAIL'
 EMAIL_APP_PASSWORD='GMAIL_APP_PASSWORD'
 ```
 
-3. Create your ./CA_CERT file with CA Certificates
+## 3. Create your ./CA_CERT file with CA Certificates
 Here are the code to create Self Signed CA CERTs using Openssl inside a docker container
+Setup the CA Cert file
+Make sure your docker is up and running.
+Make sure you are in the root directory of the project.
+We will use Openssl docker image to generate our Certificates.
 
+
+
+### 1. Make a new directory ./CA_CERT
 ```
-sudo docker 
+mkdir -p ./CA_CERT
+```
+### 2. Create the server.conf file
+
+Linux commands
+```
+cat > ./CA_CERT/server.conf <<EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = vtc-fyp-iot-project.uk
+IP.1 = 192.168.1.101
+EOF
+```
+```
+Window commands
+
+# Window
+$conf = @'
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = vtc-fyp-iot-project.uk
+IP.1 = 192.168.1.101
+'@
+
+$conf | Out-File -FilePath ./CA_CERT/server.conf -Encoding utf8
+```
+ 
+### 3. Generate Root CA
+```
+# 3.1 Generate the Private Key (The file OpenSSL says is missing)
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl genrsa -out ca-key.pem 4096
+
+# 3.2 Generate the Root Certificate (Now that the key exists)
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl req -x509 -new -nodes -key ca-key.pem -sha256 -days 3650 -subj "/CN=WaterLevel-Root-CA/O=VTC-WaterLevelProject-FYP/OU=VTC-WaterLevelProject-FYP" -out ca-cert.pem
 ```
 
-4. Configure the ESP32
+### 4. Generate MariaDB Server Certificate
+```
+# Generate Key
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl genrsa -out server-key.pem 2048
 
-Open the firmware folder ./ESP32
-Open the .ino file in your IDE.
-Update the variables in the code.
-Flash the code to your ESP32.
+# Generate CSR
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl req -new -key server-key.pem -subj "/CN=mariadb_final/O=VTC-WaterLevelProject-FYP/OU=VTC-WaterLevelProject-FYP" -out server-csr.pem
 
-## 
+# Sign Certificate
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -days 365 -sha256
+5. Generate MQTT Server Certificate
+# Generate Key
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl genrsa -out mqtt-server-key.pem 2048
 
-##
+# Generate CSR
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl req -new -key mqtt-server-key.pem -subj "/CN=mqtt-server-cert/O=VTC-WaterLevelProject-FYP/OU=VTC-WaterLevelProject-FYP" -out mqtt-server-csr.pem
+
+# Sign Certificate (Using server.conf)
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl x509 -req -in mqtt-server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out mqtt-server-cert.pem -days 365 -sha256 -extfile server.conf
+```
+ 
+### 6. Generate Client Certificate
+```
+# Generate Key
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl genrsa -out client-key.pem 2048
+
+# Generate CSR
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl req -new -key client-key.pem -subj "/CN=client-cert/O=VTC-WaterLevelProject-FYP/OU=VTC-WaterLevelProject-FYP" -out client-csr.pem
+
+# Sign Certificate
+docker run --rm -v "${PWD}/CA_CERT:/export" -w /export alpine/openssl x509 -req -in client-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out client-cert.pem -days 365 -sha256
+```
+### 7. Verification
+```
+ls -l ./CA_CERT
+```
+### 8. Fix the Permissions if you are using Linux
+```
+sudo chown -R $USER:$USER ./CA_CERT
+```
+
+
+
+## 4. Configure the ESP32
+
+Use the Setup_Wizard.html in the root directory.
+Generate the file your need for receivers and senders.
+Flash your ESP32 board using the Arduino IDE.
+Add the data of your ESP32 Node into the Database.
+(Please check Database handbook) 
