@@ -3,7 +3,7 @@ HK VTC FYP IoT project Water Level Project
 
 # Development-branch 
 
-## Please use the Development-branch to setup your own Certificate and '.env'.  
+Please use the Development-branch to setup your own Certificate and '.env'.  
 
 # Water Level Monitoring System 🌊
 A full-stack IoT solution to monitor and record water levels in real-time. This project uses an ESP32 and LoRa to collect data and a Docker-based backend to process, store, and manage the information.
