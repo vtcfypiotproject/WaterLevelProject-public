@@ -126,10 +126,14 @@ EMAIL_APP_PASSWORD='GMAIL_APP_PASSWORD'
 ```
 
 ## 3. Create your ./CA_CERT file with CA Certificates
-Here are the code to create Self Signed CA CERTs using Openssl inside a docker container
-Setup the CA Cert file
+Here are the code to create Self Signed CA CERTs using Openssl inside a docker container.
+
+Setup the CA Cert file.
+
 Make sure your docker is up and running.
+
 Make sure you are in the root directory of the project.
+
 We will use Openssl docker image to generate our Certificates.
 
 
@@ -226,7 +230,11 @@ sudo chown -R $USER:$USER ./CA_CERT
 ## 4. Configure the ESP32
 
 Use the Setup_Wizard.html in the root directory.
+
 Generate the file your need for receivers and senders.
+
 Flash your ESP32 board using the Arduino IDE.
+
 Add the data of your ESP32 Node into the Database.
+
 (Please check Database handbook) 
